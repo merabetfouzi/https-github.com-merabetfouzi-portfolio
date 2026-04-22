@@ -1270,7 +1270,7 @@ track('page_visit','','index');
 <!-- Dashboard Link -->
 <a href="/dashboard.html" target="_blank" id="dashboard-link" style="
   position:fixed; bottom:1.5rem; left:1.5rem; z-index:9000;
-  display:inline-flex; align-items:center; gap:0.5rem;
+  display:none; align-items:center; gap:0.5rem;
   padding:0.55rem 1.1rem; border-radius:100px;
   background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.55);
   font-family:'Bricolage Grotesque',sans-serif; font-size:0.68rem;
@@ -1291,6 +1291,17 @@ track('page_visit','','index');
     border-color: rgba(255,255,255,0.25);
   }
 </style>
+
+<script>
+// Check if admin is logged in to show the dashboard link
+fetch('/api/check-auth')
+  .then(r => r.json())
+  .then(data => {
+    if (data.authenticated) {
+      document.getElementById('dashboard-link').style.display = 'inline-flex';
+    }
+  });
+</script>
 
 </body>
 

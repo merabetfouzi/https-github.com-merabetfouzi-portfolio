@@ -51,6 +51,14 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/api/check-auth', (req, res) => {
+  if (req.cookies.admin_token === ADMIN_PASSWORD) {
+    res.json({ authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
 /* ── Vercel vs local file paths ───────────────────────────────
    On Vercel: __dirname is read-only. Writable temp is /tmp.
    We copy bundled files to /tmp on first read so the server
