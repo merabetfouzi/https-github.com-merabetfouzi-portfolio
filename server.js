@@ -21,19 +21,12 @@ app.get('/', (req, res) => {
 const IS_VERCEL = !!process.env.VERCEL;
 
 function getRuntimePath(filename) {
-  console.log(`Getting path for: ${filename}`);
   if (!IS_VERCEL) return path.join(__dirname, filename);
   const tmpPath = path.join('/tmp', filename);
   if (!fs.existsSync(tmpPath)) {
     const bundled = path.join(__dirname, filename);
-    console.log(`Copying from ${bundled} to ${tmpPath}`);
-    if (fs.existsSync(bundled)) {
-      fs.copyFileSync(bundled, tmpPath);
-      console.log('Copy success.');
-    } else {
-      console.log('Bundled file NOT found, creating default.');
-      fs.writeFileSync(tmpPath, JSON.stringify(getDefault(filename)));
-    }
+    if (fs.existsSync(bundled)) fs.copyFileSync(bundled, tmpPath);
+    else fs.writeFileSync(tmpPath, JSON.stringify(getDefault(filename)));
   }
   return tmpPath;
 }
