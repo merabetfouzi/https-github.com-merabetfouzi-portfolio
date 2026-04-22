@@ -93,6 +93,23 @@ function writeJSON(filename, data) {
   fs.writeFileSync(getRuntimePath(filename), JSON.stringify(data, null, 2));
 }
 
+/* ── Debug ───────────────────────────────────────────────────── */
+app.get('/api/debug-files', requireAuth, (req, res) => {
+  const listFiles = (dir) => {
+    try {
+      return fs.readdirSync(dir).map(f => {
+        const p = path.join(dir, f);
+        return fs.statSync(p).isDirectory() ? { name: f, isDir: true, children: listFiles(p) } : f;
+      });
+    } catch { return 'Error reading ' + dir; }
+  };
+  res.json({
+    dirname: __dirname,
+    public: listFiles(path.join(__dirname, 'public')),
+    root: listFiles(__dirname)
+  });
+});
+
 /* ── Portfolio Data ──────────────────────────────────────────── */
 app.get('/api/data', (req, res) => res.json(readJSON('data.json')));
 

@@ -268,7 +268,13 @@ input[type="color"]{opacity:0;position:absolute;pointer-events:none;width:0;heig
 
 <div class="body-wrap">
   <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar"><div id="sidebar-content"></div></aside>
+  <aside class="sidebar" id="sidebar">
+    <div id="vercel-warning" style="display:none; margin: 1rem; padding: 0.8rem; background: rgba(255,107,107,0.1); border: 1px solid var(--danger); border-radius: 8px; color: var(--danger); font-size: 0.65rem; line-height: 1.4;">
+      <strong>⚠️ Vercel Mode</strong><br>
+      Changes made here are <strong>temporary</strong>. To save permanently, run the project <strong>locally</strong> and push to GitHub.
+    </div>
+    <div id="sidebar-content"></div>
+  </aside>
 
   <!-- PAGE: EDIT PROJECTS -->
   <div class="page-area active" id="page-projects">
@@ -584,7 +590,10 @@ function renderPreview(){
     <div class="pf">
       <div class="pf-tab" style="background:${f.bg};color:${f.fg};margin-left:${f.tab_x||'5%'}">( ${f.tab||'?'} )</div>
       <div class="pf-body" style="background:${f.bg};color:${f.fg}">
-        <div><div class="pf-name">${f.title||'Untitled'}</div><div class="pf-meta">${f.subtitle||''}</div></div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          ${f.image_url ? `<img src="${esc(f.image_url)}" style="width:24px; height:24px; border-radius:4px; object-fit:cover; background:rgba(0,0,0,0.1)">` : ''}
+          <div><div class="pf-name">${f.title||'Untitled'}</div><div class="pf-meta">${f.subtitle||''}</div></div>
+        </div>
         <div class="pf-plus">+</div>
       </div>
     </div>`).join('');
@@ -1078,6 +1087,9 @@ function showToast(msg,type='success'){const t=document.getElementById('toast');
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}});
 
 /* ══ INIT ════════════════════════════════════════════════════ */
+if (window.location.hostname.includes('vercel.app')) {
+  document.getElementById('vercel-warning').style.display = 'block';
+}
 renderSidebar('projects');
 loadData();
 </script>
