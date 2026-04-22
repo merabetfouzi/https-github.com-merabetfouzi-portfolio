@@ -1000,11 +1000,12 @@ async function saveData(){
   markDirty();
   try {
     const res=await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+    const json=await res.json();
     if(!res.ok) throw new Error();
     isDirty=false; document.getElementById('dirty-badge').classList.remove('show');
     document.getElementById('last-saved').textContent='Saved '+new Date().toLocaleTimeString();
     localStorage.removeItem('portfolio_draft');
-    showToast('Changes saved!','success');
+    showToast(json.note || 'Changes saved!','success');
   } catch { showToast('Save failed — check server','error'); }
 }
 
@@ -1087,9 +1088,15 @@ function showToast(msg,type='success'){const t=document.getElementById('toast');
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}});
 
 /* ══ INIT ════════════════════════════════════════════════════ */
-if (window.location.hostname.includes('vercel.app')) {
-  document.getElementById('vercel-warning').style.display = 'block';
-}
+fetch('/api/check-auth')
+  .then(r => r.json())
+  .then(data => {
+    if (data.persistence === 'github') {
+      document.getElementById('vercel-warning').style.display = 'none';
+    } else if (window.location.hostname.includes('vercel.app')) {
+      document.getElementById('vercel-warning').style.display = 'block';
+    }
+  });
 renderSidebar('projects');
 loadData();
 </script>

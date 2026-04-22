@@ -25,6 +25,35 @@ const requireAuth = (req, res, next) => {
   }
 };
 
+/* ── GitHub Persistence ──────────────────────────────────────── */
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO  = 'merabetfouzi/https-github.com-merabetfouzi-portfolio';
+
+async function saveToGithub(filename, content, isBase64 = false) {
+  if (!GITHUB_TOKEN) return false;
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`;
+    const getRes = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+    
+    let sha = null;
+    if (getRes.ok) {
+      const data = await getRes.json();
+      sha = data.sha;
+    }
+
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `Update ${filename} via Dashboard`,
+        content: isBase64 ? content : Buffer.from(JSON.stringify(content, null, 2)).toString('base64'),
+        sha
+      })
+    });
+    return putRes.ok;
+  } catch (e) { console.error('GitHub Save Error:', e); return false; }
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -53,7 +82,7 @@ app.post('/api/logout', (req, res) => {
 
 app.get('/api/check-auth', (req, res) => {
   if (req.cookies.admin_token === ADMIN_PASSWORD) {
-    res.json({ authenticated: true });
+    res.json({ authenticated: true, persistence: GITHUB_TOKEN ? 'github' : 'session' });
   } else {
     res.json({ authenticated: false });
   }
@@ -113,10 +142,18 @@ app.get('/api/debug-files', requireAuth, (req, res) => {
 /* ── Portfolio Data ──────────────────────────────────────────── */
 app.get('/api/data', (req, res) => res.json(readJSON('data.json')));
 
-app.post('/api/data', requireAuth, (req, res) => {
+app.post('/api/data', requireAuth, async (req, res) => {
   try {
     writeJSON('data.json', req.body);
-    res.json({ success: true, note: IS_VERCEL ? 'Saved to session only. Redeploy to make permanent.' : 'Saved.' });
+    
+    let note = IS_VERCEL ? 'Saved to session.' : 'Saved.';
+    if (IS_VERCEL && GITHUB_TOKEN) {
+      const synced = await saveToGithub('data.json', req.body);
+      if (synced) note = 'Success! Changes committed to GitHub. Site will redeploy in 2-3 mins.';
+      else note = 'Saved to session, but GitHub sync failed. Check your token.';
+    }
+    
+    res.json({ success: true, note });
   } catch (e) { res.status(500).json({ error: 'Failed to save: ' + e.message }); }
 });
 
@@ -189,13 +226,18 @@ if (IS_VERCEL) {
   });
 }
 
-app.post('/api/upload', requireAuth, (req, res) => {
+app.post('/api/upload', requireAuth, async (req, res) => {
   try {
     const { name, data } = req.body;
     const base64  = data.split(',')[1];
     const ext     = (name.match(/\.[^.]+$/) || ['.jpg'])[0].toLowerCase().replace(/[^a-z0-9.]/g,'');
     const filename = Date.now() + ext;
     fs.writeFileSync(path.join(UPLOADS_DIR, filename), Buffer.from(base64, 'base64'));
+    
+    if (IS_VERCEL && GITHUB_TOKEN) {
+      await saveToGithub('public/uploads/' + filename, base64, true);
+    }
+    
     res.json({ url: '/uploads/' + filename });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
