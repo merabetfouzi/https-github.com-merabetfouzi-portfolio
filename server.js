@@ -6,7 +6,11 @@ const path    = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 /* ── Vercel vs local file paths ───────────────────────────────
    On Vercel: __dirname is read-only. Writable temp is /tmp.
@@ -17,12 +21,19 @@ app.use(express.static('public'));
 const IS_VERCEL = !!process.env.VERCEL;
 
 function getRuntimePath(filename) {
+  console.log(`Getting path for: ${filename}`);
   if (!IS_VERCEL) return path.join(__dirname, filename);
   const tmpPath = path.join('/tmp', filename);
   if (!fs.existsSync(tmpPath)) {
     const bundled = path.join(__dirname, filename);
-    if (fs.existsSync(bundled)) fs.copyFileSync(bundled, tmpPath);
-    else fs.writeFileSync(tmpPath, JSON.stringify(getDefault(filename)));
+    console.log(`Copying from ${bundled} to ${tmpPath}`);
+    if (fs.existsSync(bundled)) {
+      fs.copyFileSync(bundled, tmpPath);
+      console.log('Copy success.');
+    } else {
+      console.log('Bundled file NOT found, creating default.');
+      fs.writeFileSync(tmpPath, JSON.stringify(getDefault(filename)));
+    }
   }
   return tmpPath;
 }
