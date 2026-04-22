@@ -5,7 +5,7 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["data.json", "contacts.json", "analytics.json", "public/**"]
+        "includeFiles": ["data.json", "contacts.json", "analytics.json", "public/**", "private/**"]
       }
     }
   ],

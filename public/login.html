@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin Login — Fouzi Merabet</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600&family=Bricolage+Grotesque:wght@300;600&display=swap');
+
+:root {
+  --bg: #f2f0ec;
+  --text: #111;
+  --accent: #FF6B35;
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Archivo Narrow', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: var(--accent);
+}
+
+button {
+  width: 100%;
+  padding: 1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s, background 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  background: #e55a2b;
+}
+
+.error {
+  color: #d00;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <h1>Admin Access</h1>
+  <form id="login-form">
+    <input type="password" id="password" placeholder="Enter password" required />
+    <button type="submit">Login</button>
+  </form>
+  <div id="error" class="error">Incorrect password.</div>
+</div>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('error');
+  
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    
+    if (res.ok) {
+      window.location.href = '/dashboard.html';
+    } else {
+      errorEl.style.display = 'block';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Server error. Try again.';
+    errorEl.style.display = 'block';
+  }
+});
+</script>
+
+</body>
+</html>

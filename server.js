@@ -2,14 +2,53 @@ const express = require('express');
 const cors    = require('cors');
 const fs      = require('fs');
 const path    = require('path');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+/* ── Auth Middleware ─────────────────────────────────────────── */
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+const requireAuth = (req, res, next) => {
+  if (req.cookies.admin_token === ADMIN_PASSWORD) {
+    next();
+  } else {
+    if (req.path.startsWith('/api/')) {
+      res.status(401).json({ error: 'Unauthorized' });
+    } else {
+      res.redirect('/login.html');
+    }
+  }
+};
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/dashboard.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
+});
+
+app.get('/admin.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'admin.html'));
+});
+
+app.post('/api/login', (req, res) => {
+  if (req.body.password === ADMIN_PASSWORD) {
+    res.cookie('admin_token', ADMIN_PASSWORD, { httpOnly: true, secure: true, sameSite: 'strict' });
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
+
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('admin_token');
+  res.json({ success: true });
 });
 
 /* ── Vercel vs local file paths ───────────────────────────────
@@ -49,7 +88,7 @@ function writeJSON(filename, data) {
 /* ── Portfolio Data ──────────────────────────────────────────── */
 app.get('/api/data', (req, res) => res.json(readJSON('data.json')));
 
-app.post('/api/data', (req, res) => {
+app.post('/api/data', requireAuth, (req, res) => {
   try {
     writeJSON('data.json', req.body);
     res.json({ success: true, note: IS_VERCEL ? 'Saved to session only. Redeploy to make permanent.' : 'Saved.' });
@@ -57,7 +96,7 @@ app.post('/api/data', (req, res) => {
 });
 
 /* ── Contacts / Inquiries ────────────────────────────────────── */
-app.get('/api/contacts', (req, res) => res.json(readJSON('contacts.json')));
+app.get('/api/contacts', requireAuth, (req, res) => res.json(readJSON('contacts.json')));
 
 app.post('/api/contacts', (req, res) => {
   try {
@@ -72,7 +111,7 @@ app.post('/api/contacts', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/contacts/:id', (req, res) => {
+app.patch('/api/contacts/:id', requireAuth, (req, res) => {
   try {
     const store = readJSON('contacts.json');
     const i = store.contacts.findIndex(c => c.id === req.params.id);
@@ -83,7 +122,7 @@ app.patch('/api/contacts/:id', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/contacts/:id', (req, res) => {
+app.delete('/api/contacts/:id', requireAuth, (req, res) => {
   try {
     const store = readJSON('contacts.json');
     store.contacts = store.contacts.filter(c => c.id !== req.params.id);
@@ -93,7 +132,7 @@ app.delete('/api/contacts/:id', (req, res) => {
 });
 
 /* ── Analytics ───────────────────────────────────────────────── */
-app.get('/api/analytics', (req, res) => res.json(readJSON('analytics.json')));
+app.get('/api/analytics', requireAuth, (req, res) => res.json(readJSON('analytics.json')));
 
 app.post('/api/analytics/track', (req, res) => {
   try {
@@ -125,7 +164,7 @@ if (IS_VERCEL) {
   });
 }
 
-app.post('/api/upload', (req, res) => {
+app.post('/api/upload', requireAuth, (req, res) => {
   try {
     const { name, data } = req.body;
     const base64  = data.split(',')[1];
