@@ -95,9 +95,11 @@ app.get('/api/check-auth', (req, res) => {
    Changes won't survive cold-starts — edit locally, then redeploy.
 ─────────────────────────────────────────────────────────────── */
 const IS_VERCEL = !!process.env.VERCEL;
+const IS_NETLIFY = !!process.env.NETLIFY;
+const IS_SERVERLESS = IS_VERCEL || IS_NETLIFY;
 
 function getRuntimePath(filename) {
-  if (!IS_VERCEL) return path.join(__dirname, filename);
+  if (!IS_SERVERLESS) return path.join(__dirname, filename);
   const tmpPath = path.join('/tmp', filename);
   if (!fs.existsSync(tmpPath)) {
     const bundled = path.join(__dirname, filename);
@@ -146,8 +148,8 @@ app.post('/api/data', requireAuth, async (req, res) => {
   try {
     writeJSON('data.json', req.body);
     
-    let note = IS_VERCEL ? 'Saved to session.' : 'Saved.';
-    if (IS_VERCEL && GITHUB_TOKEN) {
+    let note = IS_SERVERLESS ? 'Saved to session.' : 'Saved.';
+    if (IS_SERVERLESS && GITHUB_TOKEN) {
       const synced = await saveToGithub('data.json', req.body);
       if (synced) note = 'Success! Changes committed to GitHub. Site will redeploy in 2-3 mins.';
       else note = 'Saved to session, but GitHub sync failed. Check your token.';
@@ -211,14 +213,14 @@ app.post('/api/analytics/track', (req, res) => {
 });
 
 /* ── Image Upload ────────────────────────────────────────────── */
-const UPLOADS_DIR = IS_VERCEL
+const UPLOADS_DIR = IS_SERVERLESS
   ? '/tmp/uploads'
   : path.join(__dirname, 'public', 'uploads');
 
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
-// On Vercel, also serve from /tmp/uploads since static middleware can't reach /tmp
-if (IS_VERCEL) {
+// On Serverless, also serve from /tmp/uploads since static middleware can't reach /tmp
+if (IS_SERVERLESS) {
   app.get('/uploads/:file', (req, res) => {
     const filePath = path.join('/tmp/uploads', req.params.file);
     if (fs.existsSync(filePath)) res.sendFile(filePath);
@@ -234,7 +236,7 @@ app.post('/api/upload', requireAuth, async (req, res) => {
     const filename = Date.now() + ext;
     fs.writeFileSync(path.join(UPLOADS_DIR, filename), Buffer.from(base64, 'base64'));
     
-    if (IS_VERCEL && GITHUB_TOKEN) {
+    if (IS_SERVERLESS && GITHUB_TOKEN) {
       await saveToGithub('public/uploads/' + filename, base64, true);
     }
     
@@ -242,8 +244,8 @@ app.post('/api/upload', requireAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-/* ── Start (local only — Vercel uses module.exports) ─────────── */
-if (!IS_VERCEL) {
+/* ── Start (local only) ──────────────────────────────────────── */
+if (!IS_SERVERLESS) {
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
     console.log(`Portfolio Server → http://localhost:${PORT}`);
