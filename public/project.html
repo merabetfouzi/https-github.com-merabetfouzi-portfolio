@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Project Details — Fouzi Merabet</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap');
+
+:root{
+  --bg:#f2f0ec;
+  --bg-dark:#141414;
+  --text:#111111;
+  --text-light:#f2f0ec;
+  --font-heading:'Bricolage Grotesque', sans-serif;
+  --font-body:'Archivo Narrow', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;letter-spacing:0 !important;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  padding: 4rem 2rem;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading) !important;
+  font-weight: 600;
+  letter-spacing: -0.02em !important;
+}
+
+.nav {
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.back-btn {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.3s;
+}
+.back-btn:hover { opacity: 0.6; }
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.project-header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.project-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+.project-subtitle {
+  font-size: 1rem;
+  color: #666;
+  font-family: var(--font-heading);
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+}
+
+.cover-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 4rem;
+  display: block;
+}
+
+.project-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.project-content p {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+.project-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2rem 0;
+  display: block;
+}
+
+.error-state {
+  text-align: center;
+  margin-top: 10rem;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: #666;
+}
+
+/* Loader */
+#loader {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-heading); font-size: 2rem;
+  transition: opacity 0.5s;
+}
+</style>
+</head>
+<body>
+
+<div id="loader">Loading Project...</div>
+
+<div class="nav">
+  <a href="index.html" class="back-btn">← Back to Portfolio</a>
+</div>
+
+<div class="container" id="project-container">
+  <!-- Content injected here -->
+</div>
+
+<script>
+async function loadProject() {
+  const params = new URLSearchParams(window.location.search);
+  const projectId = params.get('id');
+  const container = document.getElementById('project-container');
+  const loader = document.getElementById('loader');
+
+  if (!projectId) {
+    container.innerHTML = '<div class="error-state">No project specified.</div>';
+    loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500);
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+    const project = (data.folders || []).find(f => f.id === projectId);
+
+    if (!project) {
+      container.innerHTML = '<div class="error-state">Project not found.</div>';
+      loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500);
+      return;
+    }
+
+    document.title = `${project.title} — Fouzi Merabet`;
+
+    let html = `
+      <div class="project-header">
+        <h1 class="project-title">${project.title || 'Untitled Project'}</h1>
+        <div class="project-subtitle">${project.subtitle || ''}</div>
+      </div>
+    `;
+
+    if (project.image_url) {
+      html += `<img src="${project.image_url}" alt="Cover" class="cover-image" />`;
+    }
+
+    html += `<div class="project-content">${project.content_html || ''}</div>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = '<div class="error-state">Failed to load project data.</div>';
+  }
+
+  loader.style.opacity = '0';
+  setTimeout(() => loader.remove(), 500);
+}
+
+loadProject();
+</script>
+
+</body>
+</html>

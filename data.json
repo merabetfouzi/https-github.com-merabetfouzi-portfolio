@@ -1,0 +1,67 @@
+{
+  "site_title": "Fouzi Merabet",
+  "folders": [
+    {
+      "id": "f_1776688234817",
+      "tab": "Branding",
+      "bg": "#0070fa",
+      "fg": "#f5f5f5",
+      "tab_x": "45%",
+      "title": "One Dental",
+      "subtitle": "Visual Identity - 2025",
+      "content_html": "<div style=\"color:inherit;background-color:transparent;padding:0;text-align:left;font-size:inherit;border-radius:8px;\"><p style=\"text-align: left;\">One Dental is a modern, integrated dental brand combining three essential services: a patient-focused Center, a high-precision Lab, and a forward-thinking Academy - all unified under one name and one identity. The challenge was to create a visual system that reflects this synergy.</p></div>\n<div style=\"max-width:100%;width:100%;margin:1rem auto;\"><img src=\"/uploads/1776689044410.png\" style=\"width:100%;height:auto;border-radius:12px;display:block;\"></div>\n<div style=\"color:inherit;background-color:transparent;padding:0;text-align:left;font-size:inherit;border-radius:8px;\"><div><br></div>The name “One Dental” came from a desire to unify — not only in structure but in spirit. The word “One” carries multiple layers of meaning: it speaks to leadership (being number one), cohesion (bringing everything together under one roof), and simplicity (clarity of experience). It also echoes what patients, students, and professionals alike seek from a trusted brand: one solution, one standard, one smile.</div>\n<div style=\"max-width:100%;width:100%;margin:1rem auto;\"><img src=\"/uploads/1776689055816.png\" style=\"width:100%;height:auto;border-radius:12px;display:block;\"></div>\n<div style=\"color:inherit;background-color:transparent;padding:0;text-align:left;font-size:inherit;border-radius:8px;\">From this central idea, the visual identity took shape. The logo is minimal but rich in symbolism. A clean, circular curves subtly to suggest a smile — the universal symbol of successful dental work. Rising above it is a short vertical line, creating a quiet but confident “1.” Together, they form a mark that is both abstract and immediately legible: a number, a face, and a promise of excellence.</div>",
+      "image_url": "/uploads/1776856904148.png",
+      "link_url": "https://www.behance.net/gallery/231321991/One-Dental-Visual-Identity",
+      "blocks": [
+        {
+          "id": "b_1776688234819",
+          "type": "text",
+          "content": "<p style=\"text-align: left;\">One Dental is a modern, integrated dental brand combining three essential services: a patient-focused Center, a high-precision Lab, and a forward-thinking Academy - all unified under one name and one identity. The challenge was to create a visual system that reflects this synergy.</p>"
+        },
+        {
+          "id": "b_1776688577194",
+          "type": "image",
+          "content": "",
+          "url": "/uploads/1776689044410.png"
+        },
+        {
+          "id": "b_1776689124854",
+          "type": "text",
+          "content": "<div><br></div>The name “One Dental” came from a desire to unify — not only in structure but in spirit. The word “One” carries multiple layers of meaning: it speaks to leadership (being number one), cohesion (bringing everything together under one roof), and simplicity (clarity of experience). It also echoes what patients, students, and professionals alike seek from a trusted brand: one solution, one standard, one smile.",
+          "url": ""
+        },
+        {
+          "id": "b_1776688571138",
+          "type": "image",
+          "content": "",
+          "url": "/uploads/1776689055816.png"
+        },
+        {
+          "id": "b_1776689164918",
+          "type": "text",
+          "content": "From this central idea, the visual identity took shape. The logo is minimal but rich in symbolism. A clean, circular curves subtly to suggest a smile — the universal symbol of successful dental work. Rising above it is a short vertical line, creating a quiet but confident “1.” Together, they form a mark that is both abstract and immediately legible: a number, a face, and a promise of excellence.",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "id": "f_1776857779460",
+      "tab": "NEW FOLDER",
+      "bg": "#D8D8D8",
+      "fg": "#111111",
+      "tab_x": "10%",
+      "title": "New Project",
+      "subtitle": "Category",
+      "content_html": "<p>Describe your project here.</p>",
+      "image_url": "",
+      "link_url": "",
+      "blocks": [
+        {
+          "id": "b_1776857779463",
+          "type": "text",
+          "content": "<p>Describe your project here.</p>"
+        }
+      ]
+    }
+  ]
+}

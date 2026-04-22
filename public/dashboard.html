@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard — Fouzi Merabet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@200;300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0c0e0d; --surface:#141716; --card:#1a1d1b;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f2f0ec; --muted:rgba(242,240,236,0.42);
+  --accent:#b0f0c8; --danger:#ff6b6b; --warn:#ffc107; --info:#60a5fa;
+  --radius:14px; --font-h:'Barlow Condensed',sans-serif; --font-b:'Inter',sans-serif;
+  --tr:0.25s cubic-bezier(0.23,1,0.32,1); --topbar-h:62px; --sidebar-w:220px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
+a{text-decoration:none;color:inherit;} button{font-family:var(--font-b);}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:60;height:var(--topbar-h);display:flex;align-items:center;padding:0 1.5rem;border-bottom:1px solid var(--border);background:rgba(12,14,13,0.92);backdrop-filter:blur(14px);gap:1rem;}
+.topbar-logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#6ee7b7);display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-weight:700;font-size:.85rem;color:#0c0e0d;flex-shrink:0;}
+.topbar-name{font-family:var(--font-h);font-weight:500;font-size:1rem;text-transform:uppercase;letter-spacing:.1em;margin-right:.5rem;}
+.top-nav{display:flex;align-items:center;gap:.2rem;flex:1;}
+.top-nav-item{display:flex;align-items:center;gap:.4rem;padding:.42rem .9rem;border-radius:8px;font-size:.76rem;font-weight:500;color:var(--muted);cursor:pointer;transition:var(--tr);border:none;background:none;white-space:nowrap;}
+.top-nav-item:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.top-nav-item.active{color:var(--text);background:rgba(255,255,255,0.07);}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:var(--tr);}
+.top-nav-item.active .nav-dot{background:var(--accent);}
+.top-nav-badge{font-size:.58rem;padding:.1rem .38rem;border-radius:20px;background:rgba(255,107,107,0.2);color:var(--danger);font-weight:700;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.7rem;flex-shrink:0;}
+
+/* ── LAYOUT ── */
+.body-wrap{display:flex;margin-top:var(--topbar-h);flex:1;min-height:calc(100vh - var(--topbar-h));}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:1.25rem 0;display:flex;flex-direction:column;}
+.sidebar-section-label{font-size:.6rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.75rem 1.25rem .35rem;}
+.sidebar-item{display:flex;align-items:center;gap:.6rem;padding:.58rem 1.25rem;color:var(--muted);cursor:pointer;transition:var(--tr);font-size:.76rem;font-weight:500;border-left:2px solid transparent;}
+.sidebar-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.sidebar-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(176,240,200,0.04);}
+.sidebar-folder-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 1.25rem;font-size:.72rem;color:var(--muted);cursor:pointer;transition:var(--tr);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-folder-item:hover{color:var(--text);}
+.sidebar-swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.08);}
+.page-area{flex:1;display:none;flex-direction:column;min-width:0;}
+.page-area.active{display:flex;}
+.main-scroll{flex:1;overflow-y:auto;padding:1.75rem;display:flex;flex-direction:column;gap:1.5rem;}
+.split-layout{display:flex;flex:1;min-height:0;overflow:hidden;}
+.split-main{flex:1;overflow-y:auto;padding:1.75rem;display:flex;flex-direction:column;gap:1.5rem;}
+
+/* ── PREVIEW PANEL ── */
+.preview-panel{width:280px;flex-shrink:0;border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;}
+.preview-topbar{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.preview-title{font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.preview-frame{flex:1;overflow-y:auto;padding:1rem;background:#0f1412;}
+.prev-site-title{text-align:center;font-family:var(--font-h);font-size:1rem;font-weight:300;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.9);margin-bottom:1rem;}
+.pf{position:relative;margin-top:-.9rem;} .pf:first-child{margin-top:0;}
+.pf-tab{display:inline-flex;align-items:center;justify-content:center;padding:.3rem .7rem;border-radius:5px 5px 0 0;font-family:var(--font-h);font-size:.52rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;position:relative;top:1px;z-index:2;}
+.pf-body{border-radius:6px;padding:.65rem .85rem;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -3px 10px rgba(0,0,0,.2);}
+.pf-name{font-family:var(--font-h);font-weight:500;font-size:.78rem;text-transform:uppercase;}
+.pf-meta{font-size:.46rem;opacity:.55;margin-top:1px;letter-spacing:.08em;text-transform:uppercase;}
+.pf-plus{font-size:1rem;font-weight:200;opacity:.5;}
+
+/* ── SAVE BAR ── */
+.save-bar{border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.75rem;background:var(--surface);flex-shrink:0;}
+.dirty-badge{display:none;font-size:.62rem;padding:.18rem .48rem;border-radius:20px;background:rgba(255,193,7,.1);color:var(--warn);font-weight:700;letter-spacing:.08em;border:1px solid rgba(255,193,7,.2);}
+.dirty-badge.show{display:inline-block;}
+
+/* ── FORM ELEMENTS ── */
+.form-label{font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.35rem;}
+.form-input{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:.52rem .78rem;color:var(--text);font-family:var(--font-b);font-size:.8rem;outline:none;transition:var(--tr);width:100%;}
+.form-input:focus{border-color:var(--accent);background:rgba(176,240,200,.04);}
+.form-input::placeholder{color:rgba(255,255,255,.18);}
+.color-pill{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:.35rem .78rem;cursor:pointer;transition:var(--tr);}
+.color-pill:hover{border-color:var(--border2);}
+.color-dot{width:20px;height:20px;border-radius:5px;border:1px solid rgba(255,255,255,.1);flex-shrink:0;}
+.color-hex{font-size:.72rem;font-weight:500;font-family:'Courier New',monospace;}
+input[type="color"]{opacity:0;position:absolute;pointer-events:none;width:0;height:0;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.42rem .95rem;border-radius:8px;border:none;cursor:pointer;font-family:var(--font-b);font-size:.74rem;font-weight:600;letter-spacing:.04em;transition:var(--tr);white-space:nowrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.04);}
+.btn-accent{background:var(--accent);color:#0c0e0d;}
+.btn-accent:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(176,240,200,.2);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(255,107,107,.2);}
+.btn-danger:hover{background:rgba(255,107,107,.08);}
+.btn-icon{width:28px;height:28px;padding:0;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--muted);flex-shrink:0;}
+.btn-icon:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.04);}
+.btn-icon.is-danger:hover{color:var(--danger);border-color:rgba(255,107,107,.25);background:rgba(255,107,107,.06);}
+.btn-lg{padding:.65rem 1.5rem;font-size:.82rem;border-radius:10px;}
+.btn:disabled{opacity:.35;pointer-events:none;}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.card:hover{border-color:var(--border2);}
+.card-head{display:flex;align-items:center;gap:.85rem;padding:.88rem 1.1rem;cursor:pointer;user-select:none;transition:var(--tr);}
+.card-head:hover{background:rgba(255,255,255,.02);}
+.card-swatch{width:34px;height:34px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:.58rem;font-weight:700;border:1px solid rgba(255,255,255,.06);transition:var(--tr);}
+.card-meta{flex:1;min-width:0;}
+.card-tab{font-family:var(--font-h);font-weight:600;font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;}
+.card-subtitle{font-size:.7rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-actions{display:flex;gap:.32rem;align-items:center;margin-left:auto;flex-shrink:0;}
+.card-chevron{color:var(--muted);transition:transform var(--tr);flex-shrink:0;}
+.card.open .card-chevron{transform:rotate(180deg);}
+.card-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(0.23,1,0.32,1);border-top:0px solid var(--border);}
+.card.open .card-body{grid-template-rows:1fr;border-top-width:1px;}
+.card-body-inner{min-height:0;overflow:hidden;}
+.card-form{padding:1.25rem 1.1rem;display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+.card-form .full{grid-column:1/-1;}
+.form-group{display:flex;flex-direction:column;gap:.32rem;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.section-title{font-family:var(--font-h);font-size:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.config-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;}
+.drag-handle{color:var(--muted);cursor:grab;flex-shrink:0;display:flex;flex-direction:column;gap:2px;padding:4px;}
+.drag-handle span{display:block;width:14px;height:1.5px;background:currentColor;border-radius:2px;}
+.card.dragging{opacity:.35;border:1px dashed var(--accent);}
+.card.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(176,240,200,.15);}
+
+/* ── BEHANCE STYLE BUILDER ── */
+.builder-area { display:flex; flex-direction:column; gap:.5rem; margin-top:.3rem; }
+.builder-block { position:relative; border:1px solid transparent; border-radius:8px; transition:var(--tr); background:rgba(255,255,255,0.015); border:1px dashed rgba(255,255,255,0.05); }
+.builder-block:hover { border-color:var(--border2); background:rgba(255,255,255,0.03); }
+.builder-block-content { padding:.8rem; min-height:40px; }
+.bb-controls { position:absolute; right:-40px; top:5px; display:flex; flex-direction:column; gap:4px; opacity:0; transition:var(--tr); pointer-events:none; }
+.builder-block:hover .bb-controls { opacity:1; right:-46px; pointer-events:auto; }
+.bb-btn { width:28px; height:28px; border-radius:6px; background:var(--surface); border:1px solid var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; transition:var(--tr); }
+.bb-btn:hover { color:var(--text); border-color:var(--border2); }
+.bb-btn.is-danger:hover { color:var(--danger); border-color:rgba(255,107,107,0.3); background:rgba(255,107,107,0.05); }
+.bb-add-wrap { display:flex; align-items:center; justify-content:center; height:24px; opacity:0; transition:var(--tr); position:relative; margin:-8px 0; z-index:10; }
+.bb-add-wrap:hover, .bb-add-wrap.active { opacity:1; height:34px; margin:0; }
+.bb-add-line { position:absolute; width:100%; height:1px; background:var(--accent); top:50%; z-index:1; opacity:0.5; }
+.bb-add-btns { position:relative; z-index:2; display:flex; gap:6px; background:var(--card); padding:0 12px; }
+.bb-add-action { background:var(--surface); border:1px solid var(--border); border-radius:20px; font-size:.65rem; font-weight:600; padding:.3rem .8rem; color:var(--muted); cursor:pointer; transition:var(--tr); display:flex; align-items:center; gap:5px; font-family:var(--font-b); }
+.bb-add-action:hover { background:var(--accent); color:#111; border-color:var(--accent); transform:scale(1.05); }
+.bb-img-placeholder { border:1.5px dashed var(--border); border-radius:6px; padding:2.5rem; display:flex; flex-direction:column; align-items:center; gap:.5rem; color:var(--muted); cursor:pointer; background:rgba(255,255,255,0.01); transition:var(--tr); }
+.bb-img-placeholder:hover { border-color:var(--accent); color:var(--text); background:rgba(176,240,200,0.03); }
+.bb-image-wrap { position:relative; border-radius:6px; overflow:hidden; }
+.bb-img { width:100%; border-radius:6px; display:block; }
+.bb-img-replace { position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); color:#fff; border:none; padding:.4rem .8rem; border-radius:20px; font-size:.65rem; font-weight:600; cursor:pointer; backdrop-filter:blur(4px); opacity:0; transition:var(--tr); }
+.builder-block:hover .bb-img-replace { opacity:1; }
+.bb-img-replace:hover { background:var(--accent); color:#111; }
+.bb-text { outline:none; min-height:40px; padding:.2rem; color:var(--text); font-size:.85rem; line-height:1.6; }
+.bb-text:empty:before { content:attr("placeholder"); color:var(--muted); pointer-events:none; font-style:italic;}
+.bb-text h1, .bb-text h2 { font-weight:700; margin-bottom:.4rem; line-height:1.2; }
+.bb-text h1 { font-size:1.6rem; } .bb-text h2 { font-size:1.25rem; }
+.bb-text p { margin-bottom:.5rem; }
+.bb-text ul, .bb-text ol { padding-left:1.4rem; margin-bottom:.5rem; }
+.bb-text a { color:var(--accent); text-decoration:underline; }
+.bb-text img { max-width:100%; border-radius:6px; margin:1rem 0; display:block; }
+.bb-toolbar { position:absolute; top:-45px; left:50%; transform:translateX(-50%); background:var(--card); border:1px solid var(--border); border-radius:8px; padding:.3rem; display:flex; gap:2px; box-shadow:0 8px 16px rgba(0,0,0,0.4); z-index:20; opacity:0; pointer-events:none; transition:opacity .2s; }
+.bb-toolbar.show { opacity:1; pointer-events:auto; }
+.bbt-btn { width:26px; height:26px; border-radius:4px; border:none; background:transparent; color:var(--muted); font-weight:700; font-family:var(--font-b); font-size:.7rem; cursor:pointer; transition:var(--tr); }
+.bbt-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+.bbt-sep { width:1px; height:14px; background:var(--border); margin:0 .3rem; align-self:center; }
+.bb-settings-panel { padding:.5rem .8rem; border-top:1px solid var(--border); display:flex; gap:1rem; flex-wrap:wrap; background:rgba(255,255,255,0.02); align-items:center; }
+.bb-setting-item { display:flex; align-items:center; gap:.4rem; font-size:.65rem; color:var(--muted); }
+.bb-setting-control { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:.2rem .4rem; color:var(--text); font-size:.65rem; outline:none; }
+.bb-setting-control.full { flex:1; }
+.bb-setting-color { width:18px; height:18px; border-radius:4px; border:1px solid var(--border); cursor:pointer; }
+
+/* ── IMAGE UPLOAD ── */
+.img-upload-zone{border:1.5px dashed var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:var(--tr);position:relative;background:rgba(255,255,255,.02);}
+.img-upload-zone:hover,.img-upload-zone.drag-over{border-color:var(--accent);background:rgba(176,240,200,.04);}
+.img-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:1.75rem;color:var(--muted);}
+.img-placeholder svg{opacity:.4;}
+.img-placeholder span{font-size:.72rem;text-align:center;line-height:1.5;}
+.img-thumb-wrap{position:relative;}
+.img-thumb{width:100%;max-height:180px;object-fit:cover;display:block;}
+.img-remove{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.img-remove:hover{background:var(--danger);}
+.img-uploading{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1.5rem;color:var(--muted);font-size:.78rem;}
+.upload-progress{width:80px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+.upload-progress-bar{height:100%;width:0%;background:var(--accent);border-radius:2px;animation:uploading 1.5s ease-in-out infinite;}
+@keyframes uploading{0%{width:0%}50%{width:80%}100%{width:100%}}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.4rem;transition:var(--tr);}
+.stat-card:hover{border-color:var(--border2);}
+.stat-label{font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem;}
+.stat-value{font-family:var(--font-h);font-size:2.2rem;font-weight:300;line-height:1;}
+.stat-sub{font-size:.68rem;color:var(--muted);margin-top:.25rem;}
+.stat-accent{color:var(--accent);} .stat-danger{color:var(--danger);}
+
+/* ── BAR CHART ── */
+.bar-chart{display:flex;flex-direction:column;gap:.6rem;}
+.bar-row{display:flex;align-items:center;gap:.7rem;}
+.bar-label{font-size:.7rem;color:var(--muted);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-track{flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .8s cubic-bezier(0.23,1,0.32,1);}
+.bar-count{font-size:.68rem;color:var(--text);width:24px;text-align:right;flex-shrink:0;}
+
+/* ── ACTIVITY ── */
+.activity-list{display:flex;flex-direction:column;}
+.activity-item{display:flex;align-items:flex-start;gap:.7rem;padding:.65rem 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.activity-dot.folder{background:var(--accent);} .activity-dot.contact{background:var(--info);} .activity-dot.visit{background:var(--warn);}
+.activity-text{font-size:.74rem;color:var(--muted);flex:1;line-height:1.5;}
+.activity-text strong{color:var(--text);}
+.activity-time{font-size:.62rem;color:rgba(255,255,255,.2);flex-shrink:0;}
+
+/* ── INQUIRY CARDS ── */
+.inquiry-list{display:flex;flex-direction:column;gap:.7rem;}
+.inquiry-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.55rem;transition:var(--tr);}
+.inquiry-card:hover{border-color:var(--border2);}
+.inquiry-card.is-new{border-left:3px solid var(--danger);}
+.inquiry-card.is-read{border-left:3px solid rgba(255,255,255,.12);}
+.inquiry-card.is-replied{border-left:3px solid var(--accent);}
+.inquiry-top{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+.inquiry-name{font-weight:600;font-size:.84rem;}
+.inquiry-email{font-size:.72rem;color:var(--muted);}
+.inquiry-badge{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.16rem .48rem;border-radius:20px;margin-left:auto;flex-shrink:0;}
+.inquiry-badge.new{background:rgba(255,107,107,.12);color:var(--danger);}
+.inquiry-badge.read{background:rgba(255,255,255,.06);color:var(--muted);}
+.inquiry-badge.replied{background:rgba(176,240,200,.12);color:var(--accent);}
+.inquiry-msg{font-size:.76rem;color:var(--muted);line-height:1.6;}
+.inquiry-msg.expanded{color:var(--text);}
+.inquiry-foot{display:flex;align-items:center;gap:.45rem;}
+.inquiry-date{font-size:.62rem;color:rgba(255,255,255,.2);margin-right:auto;}
+
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;padding:4rem 2rem;color:var(--muted);text-align:center;}
+.empty-state svg{opacity:.25;} .empty-state p{font-size:.8rem;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border2);border-radius:50px;padding:.58rem 1.4rem;font-size:.76rem;font-weight:500;display:flex;align-items:center;gap:.5rem;transition:transform .4s cubic-bezier(0.23,1,0.32,1),opacity .4s;opacity:0;z-index:200;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast-dot{width:6px;height:6px;border-radius:50%;}
+.toast.success .toast-dot{background:var(--accent);} .toast.error .toast-dot{background:var(--danger);}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeSlide .3s ease both;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:.65rem;flex-shrink:0;margin-right:.5rem">
+    <div class="topbar-logo">FM</div>
+    <span class="topbar-name">Dashboard</span>
+  </div>
+  <nav class="top-nav">
+    <button class="top-nav-item active" data-page="projects" onclick="switchPage('projects')">
+      <div class="nav-dot"></div>Edit Projects
+    </button>
+    <button class="top-nav-item" data-page="inquiries" onclick="switchPage('inquiries')">
+      <div class="nav-dot"></div>Inquiries
+      <span class="top-nav-badge" id="new-inquiries-badge" style="display:none"></span>
+    </button>
+    <button class="top-nav-item" data-page="analytics" onclick="switchPage('analytics')">
+      <div class="nav-dot"></div>Analytics
+    </button>
+  </nav>
+  <div class="topbar-right">
+    <a href="file:///C:/Users/n/.gemini/antigravity/index.html" target="_blank" class="btn btn-ghost">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View Site
+    </a>
+  </div>
+</header>
+
+<div class="body-wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"><div id="sidebar-content"></div></aside>
+
+  <!-- PAGE: EDIT PROJECTS -->
+  <div class="page-area active" id="page-projects">
+    <div class="split-layout">
+      <div class="split-main">
+        <div>
+          <div class="section-header" style="margin-bottom:.6rem"><span class="section-title">Site Settings</span></div>
+          <div class="config-card">
+            <div class="form-group" style="flex:1;min-width:180px">
+              <label class="form-label">Site Title</label>
+              <input type="text" id="site-title" class="form-input" placeholder="Fouzi Merabet" oninput="markDirty()">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.22rem;padding-bottom:.1rem;">
+              <span class="form-label">Server</span>
+              <span id="api-status" style="font-size:.72rem;color:var(--muted)">Connecting…</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-header">
+            <span class="section-title">Folders <span id="folder-count" style="opacity:.35;font-size:.88em"></span></span>
+            <button class="btn btn-ghost" onclick="addFolder()">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Folder
+            </button>
+          </div>
+          <p style="font-size:.7rem;color:var(--muted);margin-bottom:.85rem">Drag ≡ to reorder · click a card to expand · Ctrl+S to save</p>
+          <div id="folders-list"></div>
+        </div>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="preview-panel">
+        <div class="preview-topbar"><div class="live-dot"></div><span class="preview-title">Live Preview</span></div>
+        <div class="preview-frame">
+          <div class="prev-site-title" id="prev-site-title">Portfolio</div>
+          <div id="prev-folders"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Save bar -->
+    <div class="save-bar">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <span class="dirty-badge" id="dirty-badge">UNSAVED</span>
+        <span id="last-saved" style="font-size:.66rem;color:var(--muted)"></span>
+      </div>
+      <button class="btn btn-accent btn-lg" onclick="saveData()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: INQUIRIES -->
+  <div class="page-area" id="page-inquiries">
+    <div class="main-scroll">
+      <div>
+        <div class="section-header">
+          <span class="section-title">Inquiries</span>
+          <div style="display:flex;gap:.4rem">
+            <button class="btn btn-ghost" onclick="filterInquiries('all')" id="f-all">All</button>
+            <button class="btn btn-ghost" onclick="filterInquiries('new')" id="f-new">New</button>
+            <button class="btn btn-ghost" onclick="filterInquiries('read')" id="f-read">Read</button>
+            <button class="btn btn-ghost" onclick="filterInquiries('replied')" id="f-replied">Replied</button>
+          </div>
+        </div>
+      </div>
+      <div class="stats-row" id="inquiry-stats"></div>
+      <div class="inquiry-list" id="inquiry-list"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: ANALYTICS -->
+  <div class="page-area" id="page-analytics">
+    <div class="main-scroll">
+      <div class="section-header">
+        <span class="section-title">Analytics</span>
+        <button class="btn btn-ghost" onclick="loadAnalytics()">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="stats-row" id="analytics-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="card" style="overflow:visible">
+          <div style="padding:1rem 1.1rem;border-bottom:1px solid var(--border)"><div style="font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Project Opens</div></div>
+          <div style="padding:1rem 1.1rem"><div class="bar-chart" id="project-opens-chart"></div></div>
+        </div>
+        <div class="card">
+          <div style="padding:1rem 1.1rem;border-bottom:1px solid var(--border)"><div style="font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Recent Activity</div></div>
+          <div style="padding:.25rem 1.1rem 1rem"><div class="activity-list" id="activity-list"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="padding:1rem 1.1rem;border-bottom:1px solid var(--border)"><div style="font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Page Visits — Last 14 Days</div></div>
+        <div style="padding:1.25rem 1.1rem" id="visits-chart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script>
+/* ══ STATE ══════════════════════════════════════════════════ */
+let state = { site_title:'', folders:[] };
+let isDirty = false, dragSrcIdx = null;
+let openCards = new Set();
+let currentPage = 'projects';
+let allContacts = [], currentFilter = 'all';
+
+/* ══ PAGE SWITCHING ═════════════════════════════════════════ */
+function switchPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.page-area').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.top-nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelector(`[data-page="${p}"]`).classList.add('active');
+  renderSidebar(p);
+  if(p==='inquiries') loadInquiries();
+  if(p==='analytics') loadAnalytics();
+}
+
+/* ══ SIDEBAR ════════════════════════════════════════════════ */
+function renderSidebar(p) {
+  const sc = document.getElementById('sidebar-content');
+  if(p==='projects'){
+    sc.innerHTML = `<div class="sidebar-section-label">Navigation</div>
+      <div class="sidebar-item active"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> All Folders</div>
+      <div class="sidebar-section-label" style="margin-top:.5rem">Folders</div>
+      <div id="sidebar-folder-list"></div>`;
+    renderSidebarFolders();
+  } else if(p==='inquiries'){
+    sc.innerHTML = `<div class="sidebar-section-label">Filter</div>
+      <div class="sidebar-item active" onclick="filterInquiries('all')">All Messages</div>
+      <div class="sidebar-item" onclick="filterInquiries('new')" style="color:var(--danger)">● New</div>
+      <div class="sidebar-item" onclick="filterInquiries('read')">Read</div>
+      <div class="sidebar-item" onclick="filterInquiries('replied')" style="color:var(--accent)">Replied</div>
+      <div class="sidebar-section-label" style="margin-top:.5rem">Actions</div>
+      <div class="sidebar-item" onclick="markAllRead()">Mark all as read</div>`;
+  } else {
+    sc.innerHTML = `<div class="sidebar-section-label">Sections</div>
+      <div class="sidebar-item active">Overview</div>
+      <div class="sidebar-item">Project Opens</div>
+      <div class="sidebar-item">Page Visits</div>
+      <div class="sidebar-section-label" style="margin-top:.5rem">Info</div>
+      <div style="padding:.5rem 1.25rem;font-size:.68rem;color:var(--muted);line-height:1.6">Folder clicks and contact form submissions are automatically tracked from the live site.</div>`;
+  }
+}
+function renderSidebarFolders(){
+  const el=document.getElementById('sidebar-folder-list'); if(!el) return;
+  el.innerHTML=state.folders.map((f,i)=>`<div class="sidebar-folder-item" onclick="openCard(${i})"><div class="sidebar-swatch" style="background:${f.bg}"></div><span>${f.tab||'Untitled'}</span></div>`).join('');
+}
+
+/* ══ PROJECTS ════════════════════════════════════════════════ */
+async function loadData() {
+  try {
+    const res = await fetch('/api/data');
+    if(!res.ok) throw new Error();
+    state = await res.json();
+    document.getElementById('api-status').innerHTML='<span style="color:var(--accent)">● Connected</span>';
+  } catch {
+    document.getElementById('api-status').innerHTML='<span style="color:var(--danger)">● Offline</span>';
+    const s=localStorage.getItem('portfolio_draft'); if(s) state=JSON.parse(s);
+  }
+  renderProjects();
+}
+
+function renderProjects(){
+  document.getElementById('site-title').value=state.site_title||'';
+  document.getElementById('folder-count').textContent=`(${state.folders.length})`;
+  renderSidebarFolders(); renderFolderList(); renderPreview();
+}
+
+function renderFolderList(){
+  const list=document.getElementById('folders-list');
+  if(!state.folders.length){
+    list.innerHTML=`<div class="empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><p>No folders yet.</p></div>`; return;
+  }
+  list.innerHTML=state.folders.map((f,i)=>buildCard(f,i)).join('');
+
+  // Init RTEs and images AFTER DOM insert
+  state.folders.forEach((f,i)=>{
+    renderFolderBlocks(i);
+    if(openCards.has(i)) document.getElementById('card-'+i)?.classList.add('open');
+  });
+
+  list.querySelectorAll('.card').forEach((card,i)=>{
+    card.setAttribute('draggable',true);
+    card.addEventListener('dragstart',e=>{ dragSrcIdx=i; setTimeout(()=>card.classList.add('dragging'),0); e.dataTransfer.effectAllowed='move'; });
+    card.addEventListener('dragend',()=>{ card.classList.remove('dragging'); list.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over')); });
+    card.addEventListener('dragover',e=>{ e.preventDefault(); list.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over')); card.classList.add('drag-over'); });
+    card.addEventListener('drop',e=>{ e.preventDefault(); card.classList.remove('drag-over'); if(dragSrcIdx===null||dragSrcIdx===i) return; const m=state.folders.splice(dragSrcIdx,1)[0]; state.folders.splice(i,0,m); dragSrcIdx=null; markDirty(); renderFolderList(); renderSidebarFolders(); renderPreview(); });
+    // Color pickers
+    card.querySelectorAll('.color-pill').forEach(pill=>{ const inp=document.getElementById(pill.dataset.for); if(inp) pill.addEventListener('click',()=>inp.click()); });
+  });
+}
+
+function buildCard(f,i){
+  const light=getLuminance(f.bg)>.4;
+  return `
+  <div class="card" id="card-${i}" style="animation-delay:${i*.04}s">
+    <div class="card-head" onclick="toggleCard(${i})">
+      <div class="drag-handle" onclick="event.stopPropagation()"><span></span><span></span><span></span></div>
+      <div class="card-swatch" style="background:${f.bg};color:${light?'#111':'#fff'}">${(f.tab||'').substring(0,3)}</div>
+      <div class="card-meta">
+        <div class="card-tab">${f.tab||'Untitled'}</div>
+        <div class="card-subtitle">${f.title||'—'} ${f.subtitle?'· '+f.subtitle:''}</div>
+      </div>
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="btn-icon btn" title="Up" onclick="moveUp(${i})" ${i===0?'disabled':''}>
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="btn-icon btn" title="Down" onclick="moveDown(${i})" ${i===state.folders.length-1?'disabled':''}>
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <button class="btn-icon btn is-danger" title="Delete" onclick="removeFolder(${i})">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+      <div class="card-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="card-body">
+      <div class="card-body-inner">
+        <div class="card-form">
+
+          <!-- Tab Name + Offset -->
+          <div class="form-group">
+            <label class="form-label">Tab Name</label>
+            <input class="form-input" type="text" value="${esc(f.tab)}" placeholder="BRANDING" oninput="update(${i},'tab',this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tab Offset</label>
+            <input class="form-input" type="text" value="${esc(f.tab_x)}" placeholder="25%" oninput="update(${i},'tab_x',this.value)">
+          </div>
+
+          <!-- Title + Subtitle -->
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input class="form-input" type="text" value="${esc(f.title)}" placeholder="Project Title" oninput="update(${i},'title',this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subtitle</label>
+            <input class="form-input" type="text" value="${esc(f.subtitle)}" placeholder="2025 // Category" oninput="update(${i},'subtitle',this.value)">
+          </div>
+
+          <!-- Colors -->
+          <div class="form-group">
+            <label class="form-label">Background Color</label>
+            <div class="color-pill" data-for="cp-bg-${i}">
+              <div class="color-dot" id="dot-bg-${i}" style="background:${f.bg}"></div>
+              <span class="color-hex" id="hex-bg-${i}">${f.bg}</span>
+            </div>
+            <input type="color" id="cp-bg-${i}" value="${f.bg}" oninput="updateColor(${i},'bg',this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Text Color</label>
+            <div class="color-pill" data-for="cp-fg-${i}">
+              <div class="color-dot" id="dot-fg-${i}" style="background:${f.fg}"></div>
+              <span class="color-hex" id="hex-fg-${i}">${f.fg}</span>
+            </div>
+            <input type="color" id="cp-fg-${i}" value="${f.fg}" oninput="updateColor(${i},'fg',this.value)">
+          </div>
+
+          <!-- Block Builder Area -->
+          <div class="form-group full" style="margin-top:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+              <label class="form-label" style="margin:0">Project Story (Builder)</label>
+              <span style="font-size:0.65rem;color:var(--muted)">Hover blocks to reorder or delete</span>
+            </div>
+            <div class="builder-area" id="builder-${i}">
+              <!-- Blocks rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group full">
+            <label class="form-label">Project Image</label>
+            <div class="img-upload-zone" id="img-zone-${i}"
+              onclick="triggerUpload(${i})"
+              ondragover="handleDragOver(event,${i})"
+              ondragleave="handleDragLeave(${i})"
+              ondrop="handleDrop(event,${i})">
+              <div id="img-preview-${i}">
+                ${f.image_url
+                  ? `<div class="img-thumb-wrap"><img class="img-thumb" src="${esc(f.image_url)}" alt="Preview"><button class="img-remove" onclick="removeImage(event,${i})" title="Remove"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`
+                  : `<div class="img-placeholder"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Click to upload or drag & drop<br><small style="opacity:.6">PNG, JPG, WebP, GIF</small></span></div>`
+                }
+              </div>
+              <input type="file" accept="image/*" id="file-${i}" style="display:none" onchange="handleFileUpload(${i},this)">
+            </div>
+            <!-- URL fallback -->
+            <input class="form-input" type="text" id="img-url-${i}" value="${esc(f.image_url)}"
+              placeholder="Or paste an image URL…" style="margin-top:.5rem"
+              oninput="update(${i},'image_url',this.value); refreshImgPreview(${i},this.value)">
+          </div>
+
+          <!-- CTA Link -->
+          <div class="form-group full">
+            <label class="form-label">Button Link URL (Optional)</label>
+            <input class="form-input" type="text" value="${esc(f.link_url)}" placeholder="https://behance.net/…" oninput="update(${i},'link_url',this.value)">
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPreview(){
+  document.getElementById('prev-site-title').textContent=state.site_title||'Portfolio';
+  document.getElementById('prev-folders').innerHTML=state.folders.map(f=>`
+    <div class="pf">
+      <div class="pf-tab" style="background:${f.bg};color:${f.fg};margin-left:${f.tab_x||'5%'}">( ${f.tab||'?'} )</div>
+      <div class="pf-body" style="background:${f.bg};color:${f.fg}">
+        <div><div class="pf-name">${f.title||'Untitled'}</div><div class="pf-meta">${f.subtitle||''}</div></div>
+        <div class="pf-plus">+</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ══ BEHANCE STYLE BUILDER ════════════════════════════════════ */
+// Ensure blocks state exists
+function ensureBlocks(i) {
+  const f = state.folders[i];
+  if (!f.blocks) {
+    if (f.content_html) f.blocks = [{ id: 'b_'+Date.now(), type: 'text', content: f.content_html }];
+    else f.blocks = [];
+  }
+}
+
+function renderFolderBlocks(i) {
+  ensureBlocks(i);
+  const f = state.folders[i];
+  const bArea = document.getElementById('builder-'+i);
+  if (!bArea) return;
+
+  if (f.blocks.length === 0) {
+    bArea.innerHTML = `<div class="bb-add-wrap active" style="margin:10px 0;"><div class="bb-add-line"></div><div class="bb-add-btns"><button class="bb-add-action" type="button" onclick="addBbBlock(${i},0,'text')">📝 Add Text</button><button class="bb-add-action" type="button" onclick="addBbBlock(${i},0,'image')">🖼️ Add Image</button></div></div>`;
+    return;
+  }
+
+  let html = `<div class="bb-add-wrap"><div class="bb-add-line"></div><div class="bb-add-btns"><button class="bb-add-action" type="button" onclick="addBbBlock(${i},0,'text')">📝 Text</button><button class="bb-add-action" type="button" onclick="addBbBlock(${i},0,'image')">🖼️ Image</button></div></div>`;
+
+  f.blocks.forEach((b, idx) => {
+    html += `<div class="builder-block" draggable="true" ondragstart="bbDragStart(event, ${i}, ${idx})" ondragover="bbDragOver(event)" ondrop="bbDrop(event, ${i}, ${idx})">
+      <div class="bb-controls">
+        <button type="button" class="bb-btn" title="Move Up" onclick="bbMoveUp(${i},${idx})" ${idx===0?'style="opacity:0.3;pointer-events:none"':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>
+        <button type="button" class="bb-btn" title="Move Down" onclick="bbMoveDown(${i},${idx})" ${idx===f.blocks.length-1?'style="opacity:0.3;pointer-events:none"':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button type="button" class="bb-btn" title="Toggle Settings" onclick="bbToggleSettings(${i},${idx})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button type="button" class="bb-btn is-danger" title="Delete Block" onclick="bbDelete(${i},${idx})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6L17 20H7L5 6m5 5v5m4-5v5"/></svg></button>
+      </div>`
+
+    if (b.type === 'text') {
+      html += `<div class="builder-block-content">
+        <div class="bb-toolbar" id="bbt-${i}-${idx}">
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'bold')"><b>B</b></button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'italic')"><i>I</i></button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'underline')"><u>U</u></button>
+          <div class="bbt-sep"></div>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'formatBlock','H1')">H1</button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'formatBlock','H2')">H2</button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'formatBlock','P')">P</button>
+          <div class="bbt-sep"></div>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'insertUnorderedList')">•</button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'justifyLeft')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h15"/></svg></button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'justifyCenter')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M4.5 18h15"/></svg></button>
+          <button class="bbt-btn" onmousedown="return bbCmd(${i},${idx},'removeFormat')" style="color:var(--danger)">✕</button>
+        </div>
+        <div class="bb-text" id="bb-text-${i}-${idx}" contenteditable="true" placeholder="Type your story..." 
+          onfocus="document.getElementById('bbt-${i}-${idx}').classList.add('show')" 
+          onblur="setTimeout(()=>document.getElementById('bbt-${i}-${idx}').classList.remove('show'),150); bbUpdateText(${i},${idx},this.innerHTML)"
+          oninput="bbUpdateText(${i},${idx},this.innerHTML)"
+          onpaste="bbPaste(event)">${b.content||''}</div>
+      </div>`;
+    } else if (b.type === 'image') {
+      html += `<div class="builder-block-content bb-image-wrap">
+        ${b.url ? `<img src="${esc(b.url)}" class="bb-img">
+                   <div style="margin-top:0.7rem; display:flex; gap:0.5rem;">
+                     <button class="btn btn-ghost" style="font-size:0.65rem;" onclick="bbTriggerUpload(${i},${idx})">↑ Replace with Upload</button>
+                     <input type="text" class="form-input" style="flex:1" placeholder="Or edit image link..." value="${esc(b.url)}" onblur="bbSetImageUrl(${i},${idx},this.value)" onkeydown="if(event.key==='Enter') { this.blur(); }">
+                   </div>` 
+                : `<div class="bb-img-placeholder" style="cursor:default">
+                     <div style="cursor:pointer; display:flex;flex-direction:column;align-items:center;width:100%" onclick="bbTriggerUpload(${i},${idx})">
+                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="margin-top:.5rem">Click to Upload Image (Max 5MB)</span>
+                     </div>
+                     <div style="margin-top:1.5rem; width:100%; max-width:350px;">
+                       <span style="font-size:0.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.1em;display:block;margin-bottom:6px;text-align:center">OR 🔗 LINKS</span>
+                       <input type="text" class="form-input" placeholder="Paste image link here..." onblur="if(this.value) bbSetImageUrl(${i},${idx},this.value)" onkeydown="if(event.key==='Enter'&&this.value) { this.blur(); }">
+                     </div>
+                   </div>`}
+        <input type="file" id="bb-file-${i}-${idx}" style="display:none" accept="image/*" onchange="bbHandleUpload(this,${i},${idx})">
+      </div>`;
+    }
+
+    html += `</div>`
+
+    // Settings Panel
+    html += `<div class="bb-settings-panel" id="bbs-${i}-${idx}" style="display:${b._showSettings?'flex':'none'}">`;
+    if (b.type === 'text') {
+      html += `
+        <div class="bb-setting-item">
+          <span>Text Color</span>
+          <input type="color" class="bb-setting-control" value="${b.color||'#ffffff'}" oninput="bbUpdateSetting(${i},${idx},'color',this.value)">
+        </div>
+        <div class="bb-setting-item">
+          <span>Align</span>
+          <select class="bb-setting-control" onchange="bbUpdateSetting(${i},${idx},'align',this.value)">
+            <option value="left" ${b.align==='left'?'selected':''}>Left</option>
+            <option value="center" ${b.align==='center'?'selected':''}>Center</option>
+            <option value="right" ${b.align==='right'?'selected':''}>Right</option>
+            <option value="justify" ${b.align==='justify'?'selected':''}>Justify</option>
+          </select>
+        </div>
+        <div class="bb-setting-item">
+          <span>Font Size</span>
+          <select class="bb-setting-control" onchange="bbUpdateSetting(${i},${idx},'fontSize',this.value)">
+            <option value="0.9rem" ${b.fontSize==='0.9rem'?'selected':''}>Small</option>
+            <option value="1.1rem" ${b.fontSize==='1.1rem'?'selected':''}>Regular</option>
+            <option value="1.4rem" ${b.fontSize==='1.4rem'?'selected':''}>Medium</option>
+            <option value="1.8rem" ${b.fontSize==='1.8rem'?'selected':''}>Large</option>
+          </select>
+        </div>
+        <div class="bb-setting-item">
+          <span>Bg Color</span>
+          <input type="color" class="bb-setting-control" value="${b.bgColor||'transparent'}" oninput="bbUpdateSetting(${i},${idx},'bgColor',this.value)">
+        </div>
+        <div class="bb-setting-item">
+          <span>Padding</span>
+          <select class="bb-setting-control" onchange="bbUpdateSetting(${i},${idx},'padding',this.value)">
+            <option value="0" ${b.padding==='0'?'selected':''}>None</option>
+            <option value="1rem" ${b.padding==='1rem'?'selected':''}>Small</option>
+            <option value="2rem" ${b.padding==='2rem'?'selected':''}>Medium</option>
+            <option value="4rem" ${b.padding==='4rem'?'selected':''}>Large</option>
+          </select>
+        </div>`;
+    } else if (b.type === 'image') {
+      html += `
+        <div class="bb-setting-item">
+          <span>Size</span>
+          <select class="bb-setting-control" onchange="bbUpdateSetting(${i},${idx},'size',this.value)">
+            <option value="25%" ${b.size==='25%'?'selected':''}>25%</option>
+            <option value="50%" ${b.size==='50%'?'selected':''}>50%</option>
+            <option value="75%" ${b.size==='75%'?'selected':''}>75%</option>
+            <option value="100%" ${b.size==='100%'?'selected':''}>100%</option>
+          </select>
+        </div>
+        <div class="bb-setting-item">
+          <span>Align</span>
+          <select class="bb-setting-control" onchange="bbUpdateSetting(${i},${idx},'align',this.value)">
+            <option value="left" ${b.align==='left'?'selected':''}>Left</option>
+            <option value="center" ${b.align==='center'?'selected':''}>Center</option>
+            <option value="right" ${b.align==='right'?'selected':''}>Right</option>
+          </select>
+        </div>
+        <div class="bb-setting-item">
+          <span>Caption</span>
+          <input type="text" class="bb-setting-control full" value="${esc(b.caption)}" placeholder="Image cap..." oninput="bbUpdateSetting(${i},${idx},'caption',this.value)">
+        </div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="bb-add-wrap"><div class="bb-add-line"></div><div class="bb-add-btns"><button class="bb-add-action" type="button" onclick="addBbBlock(${i},${idx+1},'text')">📝 Text</button><button class="bb-add-action" type="button" onclick="addBbBlock(${i},${idx+1},'image')">🖼️ Image</button></div></div>`;
+  });
+
+  bArea.innerHTML = html;
+}
+
+function bbCompileHtml(blocks) {
+  if (!blocks) return '';
+  return blocks.map(b => {
+    if (b.type === 'text') {
+      const style = `color:${b.color||'inherit'};background-color:${b.bgColor||'transparent'};padding:${b.padding||'0'};text-align:${b.align||'left'};font-size:${b.fontSize||'inherit'};border-radius:8px;`;
+      return `<div style="${style}">${b.content || ''}</div>`;
+    }
+    if (b.type === 'image' && b.url) {
+      const size = b.size || '100%';
+      const align = b.align || 'center';
+      const rounded = b.rounded || '12px';
+      const margin = align === 'center' ? '1rem auto' : align === 'right' ? '1rem 0 1rem auto' : '1rem auto 1rem 0';
+      const caption = b.caption ? `<p style="text-align:center;font-size:0.75rem;opacity:0.6;margin-top:0.5rem;font-family:sans-serif;">${esc(b.caption)}</p>` : '';
+      return `<div style="max-width:${size};width:100%;margin:${margin};"><img src="${esc(b.url)}" style="width:100%;height:auto;border-radius:${rounded};display:block;">${caption}</div>`;
+    }
+    return '';
+  }).join('\n');
+}
+
+function bbUpdateText(i, idx, htmlCode) {
+  state.folders[i].blocks[idx].content = htmlCode;
+  state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+  markDirty();
+}
+
+function bbToggleSettings(i, idx) {
+  state.folders[i].blocks[idx]._showSettings = !state.folders[i].blocks[idx]._showSettings;
+  renderFolderBlocks(i);
+}
+
+function bbUpdateSetting(i, idx, key, val) {
+  state.folders[i].blocks[idx][key] = val;
+  state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+  markDirty();
+  renderPreview();
+  // We don't necessarily need to re-render blocks for some settings, but it's safer
+  if (key === '_showSettings' || key === 'size' || key === 'align') renderFolderBlocks(i);
+}
+
+function bbSetImageUrl(i, idx, url) {
+  state.folders[i].blocks[idx].url = url;
+  state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+  markDirty();
+  renderFolderBlocks(i);
+}
+
+function addBbBlock(i, idx, type) {
+  const newBlock = { id: 'b_'+Date.now(), type, content: '', url: '' };
+  ensureBlocks(i);
+  state.folders[i].blocks.splice(idx, 0, newBlock);
+  state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+  markDirty();
+  renderFolderBlocks(i);
+  // Auto-focus if text
+  if (type === 'text') {
+    setTimeout(() => { const el = document.getElementById(`bb-text-${i}-${idx}`); if(el) el.focus(); }, 100);
+  } else if (type === 'image') {
+    setTimeout(() => bbTriggerUpload(i, idx), 100);
+  }
+}
+
+function bbDelete(i, idx) {
+  state.folders[i].blocks.splice(idx, 1);
+  state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+  markDirty();
+  renderFolderBlocks(i);
+}
+
+function bbMoveUp(i, idx) {
+  if (idx > 0) {
+    const arr = state.folders[i].blocks;
+    [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+    state.folders[i].content_html = bbCompileHtml(arr);
+    markDirty(); renderFolderBlocks(i);
+  }
+}
+function bbMoveDown(i, idx) {
+  const arr = state.folders[i].blocks;
+  if (idx < arr.length - 1) {
+    [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]];
+    state.folders[i].content_html = bbCompileHtml(arr);
+    markDirty(); renderFolderBlocks(i);
+  }
+}
+
+let bbDragSrc = null;
+function bbDragStart(e, i, idx) { bbDragSrc = idx; e.dataTransfer.effectAllowed = 'move'; }
+function bbDragOver(e) { e.preventDefault(); }
+function bbDrop(e, i, targetIdx) {
+  e.preventDefault();
+  if (bbDragSrc === null || bbDragSrc === targetIdx) return;
+  const arr = state.folders[i].blocks;
+  const item = arr.splice(bbDragSrc, 1)[0];
+  arr.splice(targetIdx, 0, item);
+  state.folders[i].content_html = bbCompileHtml(arr);
+  markDirty(); renderFolderBlocks(i);
+  bbDragSrc = null;
+}
+
+function bbCmd(i, idx, cmd, val=null) {
+  const ed = document.getElementById(`bb-text-${i}-${idx}`);
+  if (!ed) return false;
+  ed.focus();
+  document.execCommand(cmd, false, val);
+  bbUpdateText(i, idx, ed.innerHTML);
+  return false;
+}
+
+function bbPaste(e) {
+  e.preventDefault();
+  const text = e.clipboardData.getData('text/plain');
+  document.execCommand('insertText', false, text);
+}
+
+function bbTriggerUpload(i, idx) { document.getElementById(`bb-file-${i}-${idx}`)?.click(); }
+
+function bbHandleUpload(input, i, idx) {
+  const file = input.files[0];
+  if(!file) return;
+  
+  const blockWrap = input.parentElement;
+  blockWrap.innerHTML = `<div class="img-uploading" style="padding:2rem;"><div class="upload-progress"><div class="upload-progress-bar"></div></div> Uploading...</div>`;
+  
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name: file.name, data: e.target.result })
+      });
+      const json = await res.json();
+      if(!json.url) throw new Error();
+      
+      state.folders[i].blocks[idx].url = json.url;
+      state.folders[i].content_html = bbCompileHtml(state.folders[i].blocks);
+      markDirty();
+      renderFolderBlocks(i);
+    } catch(err) {
+      showToast('Block image upload failed','error');
+      renderFolderBlocks(i); // revert
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══ IMAGE UPLOAD ════════════════════════════════════════════ */
+function triggerUpload(i) {
+  document.getElementById('file-'+i)?.click();
+}
+function handleDragOver(e, i) {
+  e.preventDefault(); e.dataTransfer.dropEffect='copy';
+  document.getElementById('img-zone-'+i)?.classList.add('drag-over');
+}
+function handleDragLeave(i) {
+  document.getElementById('img-zone-'+i)?.classList.remove('drag-over');
+}
+function handleDrop(e, i) {
+  e.preventDefault();
+  document.getElementById('img-zone-'+i)?.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')) processImageFile(i, file);
+}
+function handleFileUpload(i, input) {
+  const file = input.files[0];
+  if(file) processImageFile(i, file);
+}
+function processImageFile(i, file) {
+  // Show uploading state
+  const preview = document.getElementById('img-preview-'+i);
+  preview.innerHTML = `<div class="img-uploading"><div class="upload-progress"><div class="upload-progress-bar"></div></div> Uploading…</div>`;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name: file.name, data: e.target.result })
+      });
+      const json = await res.json();
+      if(!json.url) throw new Error(json.error||'Upload failed');
+      // Update state + UI
+      state.folders[i].image_url = json.url;
+      const urlInput = document.getElementById('img-url-'+i);
+      if(urlInput) urlInput.value = json.url;
+      preview.innerHTML = `<div class="img-thumb-wrap"><img class="img-thumb" src="${json.url}" alt="Preview"><button class="img-remove" onclick="removeImage(event,${i})" title="Remove"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+      markDirty();
+      showToast('Image uploaded!','success');
+    } catch(err) {
+      preview.innerHTML = `<div class="img-placeholder"><span style="color:var(--danger)">Upload failed. Check server.</span></div>`;
+      showToast('Upload failed','error');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(e, i) {
+  e.stopPropagation();
+  state.folders[i].image_url = '';
+  const urlInput = document.getElementById('img-url-'+i);
+  if(urlInput) urlInput.value = '';
+  const preview = document.getElementById('img-preview-'+i);
+  preview.innerHTML = `<div class="img-placeholder"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Click to upload or drag & drop<br><small style="opacity:.6">PNG, JPG, WebP, GIF</small></span></div>`;
+  markDirty();
+}
+function refreshImgPreview(i, url) {
+  if(!url) { removeImage({stopPropagation:()=>{}}, i); return; }
+  const preview = document.getElementById('img-preview-'+i);
+  if(!preview) return;
+  preview.innerHTML = `<div class="img-thumb-wrap"><img class="img-thumb" src="${url}" alt="Preview"><button class="img-remove" onclick="removeImage(event,${i})" title="Remove"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+}
+
+/* ══ DATA MUTATIONS ══════════════════════════════════════════ */
+function toggleCard(i){
+  const card=document.getElementById('card-'+i); if(!card) return;
+  openCards.has(i)?(openCards.delete(i),card.classList.remove('open')):(openCards.add(i),card.classList.add('open'));
+}
+function openCard(i){
+  switchPage('projects');
+  setTimeout(()=>{ const c=document.getElementById('card-'+i); if(!c)return; openCards.add(i); c.classList.add('open'); c.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+}
+function update(i,field,value){ state.folders[i][field]=value; markDirty(); renderSidebarFolders(); renderPreview(); refreshCardHead(i); }
+function updateColor(i,field,value){
+  state.folders[i][field]=value;
+  document.getElementById(`dot-${field}-${i}`).style.background=value;
+  document.getElementById(`hex-${field}-${i}`).textContent=value;
+  markDirty(); refreshCardHead(i); renderSidebarFolders(); renderPreview();
+}
+function refreshCardHead(i){
+  const f=state.folders[i]; const card=document.getElementById('card-'+i); if(!card) return;
+  const sw=card.querySelector('.card-swatch'); const light=getLuminance(f.bg)>.4;
+  if(sw){sw.style.background=f.bg;sw.style.color=light?'#111':'#fff';sw.textContent=(f.tab||'').substring(0,3);}
+  const tab=card.querySelector('.card-tab'); if(tab) tab.textContent=f.tab||'Untitled';
+  const sub=card.querySelector('.card-subtitle'); if(sub) sub.textContent=`${f.title||'—'} ${f.subtitle?'· '+f.subtitle:''}`;
+}
+function markDirty(){
+  state.site_title=document.getElementById('site-title').value;
+  isDirty=true; document.getElementById('dirty-badge').classList.add('show');
+  localStorage.setItem('portfolio_draft',JSON.stringify(state));
+}
+function addFolder(){
+  state.folders.push({id:'f_'+Date.now(),tab:'NEW FOLDER',bg:'#D8D8D8',fg:'#111111',tab_x:'10%',title:'New Project',subtitle:'Category',content_html:'<p>Describe your project here.</p>',image_url:'',link_url:''});
+  markDirty(); renderProjects();
+  setTimeout(()=>openCard(state.folders.length-1),80);
+  showToast('Folder added','success');
+}
+function removeFolder(i){ if(!confirm(`Delete "${state.folders[i].tab}"?`)) return; openCards.delete(i); state.folders.splice(i,1); markDirty(); renderProjects(); showToast('Deleted','success'); }
+function moveUp(i){ if(i>0){[state.folders[i],state.folders[i-1]]=[state.folders[i-1],state.folders[i]]; markDirty(); renderProjects();} }
+function moveDown(i){ if(i<state.folders.length-1){[state.folders[i],state.folders[i+1]]=[state.folders[i+1],state.folders[i]]; markDirty(); renderProjects();} }
+
+async function saveData(){
+  markDirty();
+  try {
+    const res=await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+    if(!res.ok) throw new Error();
+    isDirty=false; document.getElementById('dirty-badge').classList.remove('show');
+    document.getElementById('last-saved').textContent='Saved '+new Date().toLocaleTimeString();
+    localStorage.removeItem('portfolio_draft');
+    showToast('Changes saved!','success');
+  } catch { showToast('Save failed — check server','error'); }
+}
+
+/* ══ INQUIRIES ═══════════════════════════════════════════════ */
+async function loadInquiries(){
+  try{ const r=await fetch('/api/contacts'); const d=await r.json(); allContacts=d.contacts||[]; } catch{ allContacts=[]; }
+  renderInquiries();
+}
+function renderInquiries(){
+  const filtered=currentFilter==='all'?allContacts:allContacts.filter(c=>c.status===currentFilter);
+  const nc=allContacts.filter(c=>c.status==='new').length;
+  const badge=document.getElementById('new-inquiries-badge');
+  if(nc>0){badge.textContent=nc;badge.style.display='';}else{badge.style.display='none';}
+  document.getElementById('inquiry-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${allContacts.length}</div></div>
+    <div class="stat-card"><div class="stat-label">New</div><div class="stat-value stat-danger">${nc}</div></div>
+    <div class="stat-card"><div class="stat-label">Read</div><div class="stat-value">${allContacts.filter(c=>c.status==='read').length}</div></div>
+    <div class="stat-card"><div class="stat-label">Replied</div><div class="stat-value stat-accent">${allContacts.filter(c=>c.status==='replied').length}</div></div>`;
+  const list=document.getElementById('inquiry-list');
+  if(!filtered.length){ list.innerHTML=`<div class="empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><p>${currentFilter==='all'?'No inquiries yet.':'No '+currentFilter+' messages.'}</p></div>`; return; }
+  list.innerHTML=filtered.map(c=>`
+    <div class="inquiry-card is-${c.status}">
+      <div class="inquiry-top">
+        <div><div class="inquiry-name">${esc(c.name||'Anonymous')}</div><div class="inquiry-email">${esc(c.email||'')}</div></div>
+        <span class="inquiry-badge ${c.status}">${c.status.toUpperCase()}</span>
+      </div>
+      <div class="inquiry-msg" id="msg-${c.id}">${esc(c.message||'').substring(0,160)}${(c.message||'').length>160?'…':''}</div>
+      <div class="inquiry-foot">
+        <span class="inquiry-date">${formatDate(c.date)}</span>
+        ${c.status==='new'?`<button class="btn btn-ghost" style="font-size:.68rem;padding:.28rem .65rem" onclick="setStatus('${c.id}','read')">Mark Read</button>`:''}
+        ${c.status!=='replied'?`<button class="btn btn-ghost" style="font-size:.68rem;padding:.28rem .65rem;color:var(--accent)" onclick="setStatus('${c.id}','replied')">Replied</button>`:''}
+        <button class="btn btn-ghost" style="font-size:.68rem;padding:.28rem .65rem" onclick="toggleMsg('${c.id}','${esc(c.message||'')}')">Expand</button>
+        <button class="btn btn-danger" style="font-size:.68rem;padding:.28rem .65rem" onclick="deleteContact('${c.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function filterInquiries(f){ currentFilter=f; renderInquiries(); }
+async function setStatus(id,status){
+  try{ await fetch(`/api/contacts/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); const c=allContacts.find(x=>x.id===id); if(c)c.status=status; renderInquiries(); showToast('Updated','success'); } catch{ showToast('Failed','error'); }
+}
+async function deleteContact(id){
+  if(!confirm('Delete this message?')) return;
+  try{ await fetch(`/api/contacts/${id}`,{method:'DELETE'}); allContacts=allContacts.filter(c=>c.id!==id); renderInquiries(); showToast('Deleted','success'); } catch{ showToast('Failed','error'); }
+}
+async function markAllRead(){ const toMark=allContacts.filter(c=>c.status==='new'); for(const c of toMark) await setStatus(c.id,'read'); }
+function toggleMsg(id,full){ const el=document.getElementById('msg-'+id); if(!el)return; if(el.classList.contains('expanded')){el.classList.remove('expanded');el.textContent=full.substring(0,160)+(full.length>160?'…':'');}else{el.classList.add('expanded');el.textContent=full;} }
+
+/* ══ ANALYTICS ═══════════════════════════════════════════════ */
+async function loadAnalytics(){
+  let ad={events:[],project_opens:{},page_visits:{}}, cd={contacts:[]};
+  try{ const[ar,cr]=await Promise.all([fetch('/api/analytics'),fetch('/api/contacts')]); ad=await ar.json(); cd=await cr.json(); } catch{}
+  const opens=ad.project_opens||{}, visits=ad.page_visits||{}, events=ad.events||[], contacts=cd.contacts||[];
+  const totalOpens=Object.values(opens).reduce((a,b)=>a+b,0);
+  const totalVisits=Object.values(visits).reduce((a,b)=>a+b,0);
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('analytics-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Project Opens</div><div class="stat-value stat-accent">${totalOpens}</div><div class="stat-sub">All folders combined</div></div>
+    <div class="stat-card"><div class="stat-label">Page Visits</div><div class="stat-value">${totalVisits}</div><div class="stat-sub">${visits[today]||0} today</div></div>
+    <div class="stat-card"><div class="stat-label">Inquiries</div><div class="stat-value">${contacts.length}</div><div class="stat-sub">${contacts.filter(c=>c.status==='new').length} unread</div></div>
+    <div class="stat-card"><div class="stat-label">Events Logged</div><div class="stat-value">${events.length}</div></div>`;
+  const fmap={}; (state.folders||[]).forEach(f=>fmap[f.id]=f.tab||f.title||f.id);
+  const maxO=Math.max(1,...Object.values(opens));
+  document.getElementById('project-opens-chart').innerHTML=Object.entries(opens).sort((a,b)=>b[1]-a[1]).map(([id,n])=>`
+    <div class="bar-row"><div class="bar-label">${esc(fmap[id]||id)}</div><div class="bar-track"><div class="bar-fill" style="width:${(n/maxO*100).toFixed(1)}%"></div></div><div class="bar-count">${n}</div></div>`).join('')||'<p style="font-size:.72rem;color:var(--muted)">No data yet. Click folders on the live site to track opens.</p>';
+  document.getElementById('activity-list').innerHTML=events.slice(0,12).map(ev=>`
+    <div class="activity-item"><div class="activity-dot ${ev.type==='folder_open'?'folder':ev.type==='contact'?'contact':'visit'}"></div>
+    <div class="activity-text">${ev.type==='folder_open'?`Opened <strong>${esc(fmap[ev.id]||ev.label||'folder')}</strong>`:ev.type==='contact'?`Inquiry from <strong>${esc(ev.label||'')}</strong>`:`Page visit`}</div>
+    <div class="activity-time">${formatDate(ev.date)}</div></div>`).join('')||'<p style="font-size:.72rem;color:var(--muted);padding:.5rem 0">No activity yet.</p>';
+  const days=[]; for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);days.push({k,l:d.toLocaleDateString('en',{month:'short',day:'numeric'}),v:visits[k]||0});}
+  const maxV=Math.max(1,...days.map(d=>d.v));
+  document.getElementById('visits-chart').innerHTML=`<div style="display:flex;align-items:flex-end;gap:5px;height:72px">${days.map(d=>`<div style="flex:1;background:${d.v?'var(--accent)':'rgba(255,255,255,0.05)'};height:${Math.max(3,d.v/maxV*68)}px;border-radius:3px 3px 0 0;transition:height .5s" title="${d.l}: ${d.v} visits"></div>`).join('')}</div><div style="display:flex;gap:5px;margin-top:5px">${days.map((d,j)=>j%3===0?`<div style="flex:1;font-size:.5rem;color:var(--muted);text-align:center">${d.l}</div>`:'<div style="flex:1"></div>').join('')}</div>`;
+}
+
+/* ══ UTILS ═══════════════════════════════════════════════════ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getLuminance(hex){try{const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const t=x=>x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4);return .2126*t(r)+.7152*t(g)+.0722*t(b);}catch{return 0;}}
+function formatDate(iso){if(!iso)return '';const d=new Date(iso),diff=Date.now()-d;if(diff<60000)return 'just now';if(diff<3600000)return Math.floor(diff/60000)+'m ago';if(diff<86400000)return Math.floor(diff/3600000)+'h ago';return d.toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'});}
+let toastTimer;
+function showToast(msg,type='success'){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.className=`toast ${type} show`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}});
+
+/* ══ INIT ════════════════════════════════════════════════════ */
+renderSidebar('projects');
+loadData();
+</script>
+</body>
+</html>
